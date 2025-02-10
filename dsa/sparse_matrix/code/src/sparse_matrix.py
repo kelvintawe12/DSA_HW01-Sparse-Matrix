@@ -1,6 +1,6 @@
 class SparseMatrix:
     def __init__(self, matrixFilePath=None, numRows=None, numCols=None):
-        if matrixFilePath:
+        if matrixFilePath is not None:
             self.load_from_file(matrixFilePath)
         elif numRows is not None and numCols is not None:
             self.numRows = numRows
@@ -22,8 +22,7 @@ class SparseMatrix:
                         row, col, value = map(int, line.strip('()').split(','))
                         self.setElement(row, col, value)
         except Exception as e:
-            print(f"Error opening file: {e}")
-            return
+            raise ValueError(f"Error loading file: {e}")
 
     def getElement(self, currRow, currCol):
         return self.data.get((currRow, currCol), 0)
@@ -35,22 +34,30 @@ class SparseMatrix:
             del self.data[(currRow, currCol)]
 
     def add(self, other):
-        result = SparseMatrix(self.numRows, self.numCols)
-        for (row, col), value in self.data.items():
-            result.setElement(row, col, value + other.getElement(row, col))
+        if self.numRows != other.numRows or self.numCols != other.numCols:
+            raise ValueError("Matrices dimensions do not match for addition.")
+        result = SparseMatrix(numRows=self.numRows, numCols=self.numCols)
+        for (row, col) in set(self.data.keys()).union(other.data.keys()):
+            sum_val = self.getElement(row, col) + other.getElement(row, col)
+            result.setElement(row, col, sum_val)
         return result
 
     def subtract(self, other):
-        result = SparseMatrix(self.numRows, self.numCols)
-        for (row, col), value in self.data.items():
-            result.setElement(row, col, value - other.getElement(row, col))
+        if self.numRows != other.numRows or self.numCols != other.numCols:
+            raise ValueError("Matrices dimensions do not match for subtraction.")
+        result = SparseMatrix(numRows=self.numRows, numCols=self.numCols)
+        for (row, col) in set(self.data.keys()).union(other.data.keys()):
+            sub_val = self.getElement(row, col) - other.getElement(row, col)
+            result.setElement(row, col, sub_val)
         return result
 
     def multiply(self, other):
         if self.numCols != other.numRows:
             raise ValueError("Number of columns in the first matrix must equal the number of rows in the second matrix.")
-        result = SparseMatrix(self.numRows, other.numCols)
-        for (row, col), value in self.data.items():
-            for k in range(other.numCols):
-                result.setElement(row, k, result.getElement(row, k) + value * other.getElement(col, k))
+        result = SparseMatrix(numRows=self.numRows, numCols=other.numCols)
+        for (row_a, col_a) in self.data:
+            for col_b in range(other.numCols):
+                val = self.data[(row_a, col_a)] * other.getElement(col_a, col_b)
+                if val != 0:
+                    result.setElement(row_a, col_b, result.getElement(row_a, col_b) + val)
         return result
