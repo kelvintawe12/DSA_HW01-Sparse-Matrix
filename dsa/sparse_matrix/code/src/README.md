@@ -13,7 +13,7 @@ This project implements a Sparse Matrix data structure in C++. A sparse matrix i
 To use this project, clone the repository and compile the source code using a C++ compiler.
 
 ```sh
-git clone https://github.com/yourusername/sparse_matrix.git
+git clone https://github.com/kelvintawe12/DSA_HW01-Sparse-Matrix.git
 cd sparse_matrix/code/src
 g++ -o sparse_matrix main.cpp sparse_matrix.cpp
 ```
